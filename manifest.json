@@ -1,7 +1,10 @@
 {
     "manifest_version": 2,
-    "name": "My Cool Extension",
+    "name": "BMO Credit Balance",
     "version": "0.1",
+    "icons":{
+        "128": "money-bag.png"
+    },
     "content_scripts": [
         {
           "matches": [
@@ -9,5 +12,6 @@
           ],
           "js": ["content.js"]
         }
-      ]
+    ]
+    
 }

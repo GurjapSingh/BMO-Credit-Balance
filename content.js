@@ -3,38 +3,71 @@ var balance_list_desc = []
 var testList_1 = []
 var testList_2 = []
 var transaction_list = []
+
 function changeOrder(list,tl){
     transaction_table = document.querySelector("#ccDetailsTransactionAccountAccess > tbody")
-    for(var i = 1,j=0; i < transaction_table.children.length; i++,j++){
+    for(var i = 1; i < transaction_table.children.length; i++){
         var row = transaction_table.children[i]
-        console.log(transaction_list[j])
-        var new_col = document.createElement("td")
-        new_col.innerText = "pay"
-        console.log(balance_list_asc[j].debit)
-        row.appendChild(balance_list_asc[j].debit)
-        row.appendChild(list[j].credit)
-        row.appendChild(list[j].balance)
+
+        search_trans_date = row.getElementsByClassName("ccTransDate")[0].innerText
+        search_post_date = row.getElementsByClassName("ccPostingDate")[0].innerText
+        search_descr = row.getElementsByClassName("ccTransDescription")[0].innerText
+        search_amt = row.getElementsByClassName("ccTransAmount")[0].innerText
+
+        if (search_amt.includes("CR")){
+            console.log("credit "+search_amt)
+            index = list.findIndex(x => x.trans_date === search_trans_date && x.post_date === search_post_date && x.descr === search_descr && search_amt.includes(x.credit) && x.debit === "")
+        } else {
+            console.log("debit "+search_amt)
+            index = list.findIndex(x => x.trans_date === search_trans_date && x.post_date === search_post_date && x.descr === search_descr && search_amt == x.debit && x.credit === "")
+
+        }
+        
+        console.log("index is " + index)
+        debit_amt = document.createElement("td")
+        credit_amt = document.createElement("td")
+        row_balance = credit_amt.cloneNode(true)
+        
+        debit_amt.innerText = list[index].debit
+        credit_amt.innerText = list[index].credit
+        row_balance.innerText = "$"+list[index].balance
+
+        // console.log(transaction_list[j])
+        // var new_col = document.createElement("td")
+        // new_col.innerText = "pay"
+        // console.log(balance_list_asc[j].debit)
+
+        row.appendChild(debit_amt)
+        row.appendChild(credit_amt)
+        row.appendChild(row_balance)
     }
 }
-function myFunction() {
+function sortChange() {
     console.log("welcome to my function")
     setTimeout( () => {
-        console.log(transaction_date)
-        if (transaction_date.classList.contains("sortedDesc") == true){
-            console.log("changing from sortedDesc to sortedAsc")
-            console.log(balance_list_desc)
-            console.log(testList_2)
-            changeOrder(balance_list_desc,testList_2)
-        } else {
-            console.log("changing from sortedAsc to sortedDesc")
-            console.log(balance_list_asc)
-            console.log(testList_1)
-            changeOrder(balance_list_asc,testList_1)
-        }
-    }, 1000);
+        // console.log(transaction_date)
+        // if (transaction_date.classList.contains("sortedDesc") == true){
+        //     console.log("changing from sortedDesc to sortedAsc")
+        //     console.log(balance_list_desc)
+        //     console.log(testList_2)
+        //     changeOrder(balance_list_desc,testList_2)
+        // } else {
+        //     console.log("changing from sortedAsc to sortedDesc")
+        //     console.log(balance_list_asc)
+        //     console.log(testList_1)
+        //     changeOrder(balance_list_asc,testList_1)
+        // }
+        changeOrder(balance_list_asc,testList_1)
+    }, 500);
 }
-transaction_date = document.querySelector("#ccDetailsTransactionAccountAccess > thead > tr > th.ccTransDate.ptTableFirstColumnHeader > a")
-transaction_date.setAttribute("id", "sortedAnchor")
+sortTransDate = document.querySelector("#ccDetailsTransactionAccountAccess > thead > tr > th.ccTransDate.ptTableFirstColumnHeader > a")
+sortTransDate.setAttribute("id", "sortTransDate")
+sortPostDate = document.querySelector("#ccDetailsTransactionAccountAccess > thead > tr > th.ccPostingDate > a")
+sortPostDate.setAttribute("id","sortPostDate")
+sortDesc = document.querySelector("#ccDetailsTransactionAccountAccess > thead > tr > th.ccTransDescription > a")
+sortDesc.setAttribute("id","sortDesc")
+sortAmt = document.querySelector("#ccDetailsTransactionAccountAccess > thead > tr > th.ccTransAmount > a")
+sortAmt.setAttribute("id","sortAmt")
 
 console.log("hello from the bmo page")
 summary_table = document.getElementsByClassName("summaryTable")[0]
@@ -47,11 +80,11 @@ posted_table = document.querySelector("#ccDetailsTransactionAccountAccess")
 // balance_header = posted_table.getElementsByTagName("th")[0].cloneNode(true)
 // balance_header.innerText = "Balance"
 var new_col = document.createElement("th")
-new_col.innerText = "debit"
+new_col.innerText = "Debit"
 posted_table.getElementsByTagName("tr")[0].appendChild(new_col)
 
 var new_col = document.createElement("th")
-new_col.innerText = "credit"
+new_col.innerText = "Credit"
 posted_table.getElementsByTagName("tr")[0].appendChild(new_col)
 
 var new_col = document.createElement("th")
@@ -70,35 +103,34 @@ var next_diff_amt = 0;
 
 for(var i = transaction_table.children.length-1; i > 0; i--){
     var row = transaction_table.children[i]
-    
-    debit_amt = document.createElement("td")
-    credit_amt = document.createElement("td")
-    row_balance = balance_elem.cloneNode(true)
-    // console.log(row)
     var amt = row.getElementsByClassName("ccTransAmount")[0].innerText
+    
+    transaction_row = {trans_date:"",post_date:"",descr:"",amt:"",debit:"",credit:"",balance:""}
+    
+    // console.log(row)
+    transaction_row.trans_date = row.getElementsByClassName("ccTransDate")[0].innerText
+    transaction_row.post_date = row.getElementsByClassName("ccPostingDate")[0].innerText
+    transaction_row.descr = row.getElementsByClassName("ccTransDescription")[0].innerText
+    transaction_row.amt = amt
+
     // console.log("amt is " + amt)
     
     // var diff_amt = 4.5
-    transaction_row = {debit:"",credit:"",balance:""}
     if (amt.includes("CR")) {
-        debit_amt.innerText = ""
-        credit_amt.innerText = amt.substring(0,amt.length-3)
-        transaction_row.credit = credit_amt.innerText
-        next_diff_amt = parseFloat(credit_amt.innerText.substring(1,))
+        transaction_row.credit = amt.substring(0,amt.length-3)
+        next_diff_amt = parseFloat(transaction_row.credit.substring(1,))
     } else {
-        debit_amt.innerText = amt
         transaction_row.debit = amt
-        credit_amt.innerText = ""
         next_diff_amt = parseFloat(amt.substring(1,)) * (-1)
     }
   
     current_balance = current_balance + diff_amt
-    row_balance.innerText = current_balance
+    transaction_row.balance = current_balance.toFixed(2)
     
     diff_amt = next_diff_amt
 
-    thisRow = {debit: debit_amt, credit: credit_amt, balance: row_balance}
-    balance_list_desc.push(thisRow)
+    // thisRow = {debit: debit_amt, credit: credit_amt, balance: row_balance}
+    balance_list_desc.push(transaction_row)
     transaction_list.push(transaction_row)
     testList_1.push(amt)
     testList_2.push(amt)
@@ -108,7 +140,11 @@ balance_list_asc = balance_list_desc.slice().reverse()
 
 // balance_list_desc.unshift({debit: 0.0, credit: 0.0, balance: 0.0})
 // changeOrder(balance_list_asc,testList_1)
-myFunction()
+sortChange()
 console.log(balance_list_asc)
 
-sortedAnchor.addEventListener('click', myFunction);
+sortTransDate.addEventListener('click', sortChange);
+sortPostDate.addEventListener('click', sortChange);
+sortDesc.addEventListener('click', sortChange);
+sortAmt.addEventListener('click', sortChange);
+
